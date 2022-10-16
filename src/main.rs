@@ -131,12 +131,13 @@ fn main() {
         .version("0.1.0")
         .args([
             Arg::new("all")
+                .help("Include hidden files")
                 .short('a')
                 .long("all")
                 .required(false)
                 .action(ArgAction::SetTrue),
             Arg::new("target")
-                .help("target directory")
+                .help("Target directory")
                 .required(false)
                 .action(ArgAction::Set)
                 .num_args(1..),
