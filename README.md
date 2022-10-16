@@ -18,3 +18,18 @@ Options:
   -h, --help     Print help information
   -V, --version  Print version information
 ```
+
+Installation, there are two ways to install this.
+
+1. Clone the repository, and build using ```cargo b --realease```.
+```bash
+git clone https://github.com/mystique09/lls-clap
+cd lls-clap
+cargo b --realease
+# The binary is inside the target/release directory.
+```
+
+2. Install using ```cargo install```.
+```bash
+cargo install --git https://github.com/mystique09/lls-clap
+```
