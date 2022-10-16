@@ -1,0 +1,10 @@
+[package]
+name = "lls"
+version = "0.1.0"
+edition = "2021"
+author = "Benjie Ben Garcia, mystique09"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.0.15" }
