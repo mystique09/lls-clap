@@ -27,7 +27,7 @@ impl Tree {
         *depth += 1;
 
         match contents {
-            Ok(content) => self.read_target(content, depth, path, include_hidden),
+            Ok(content) => self.read_target(content, depth, &path, include_hidden),
             Err(why) => eprintln!("{why}"),
         }
     }
@@ -73,7 +73,7 @@ impl Tree {
                 return;
             }
             let inner_path = format!("{}/{}", path, target_name);
-            self.display_dir(&inner_path, depth, include_hidden);
+            self.display_dir(&target_name, &inner_path, depth, include_hidden);
         }
 
         if ftype.is_file() {
@@ -84,17 +84,23 @@ impl Tree {
         }
     }
 
-    fn display_dir(&mut self, target_name: &str, depth: &mut usize, include_hidden: &bool) {
+    fn display_dir(
+        &mut self,
+        target_name: &str,
+        inner_path: &str,
+        depth: &mut usize,
+        include_hidden: &bool,
+    ) {
         self.total_dirs += 1;
         let mut inner_depth = *depth;
 
         println!(
             "{}{BLUE}└── {}{RESET}",
             &" ".repeat(inner_depth),
-            target_name.replace("./", "")
+            target_name
         );
         std::io::stdout().flush().unwrap();
-        self.crawl_target(target_name, &mut inner_depth, include_hidden);
+        self.crawl_target(inner_path, &mut inner_depth, include_hidden);
     }
 
     fn display_file(&mut self, target_name: &str, depth: &mut usize) {
