@@ -21,11 +21,11 @@ Options:
 
 Installation, there are two ways to install this.
 
-1. Clone the repository, and build using ```cargo b --realease```.
+1. Clone the repository, and build using ```cargo b --release```.
 ```bash
 git clone https://github.com/mystique09/lls-clap
 cd lls-clap
-cargo b --realease
+cargo b --release
 # The binary is inside the target/release directory.
 ```
 
