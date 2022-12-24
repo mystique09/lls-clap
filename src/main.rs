@@ -82,10 +82,10 @@ impl Tree {
         include_hidden: bool,
     ) -> io::Result<()> {
         if ftype.is_dir() {
+            let inner_path = path.join(target_name.to_string());
             if target_name.starts_with('.') && !include_hidden {
                 return Ok(());
             }
-            let inner_path = path.join(target_name.to_string());
             self.display_dir(&target_name, &inner_path, depth, include_hidden)?;
             return Ok(());
         }
