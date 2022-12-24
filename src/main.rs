@@ -90,16 +90,12 @@ impl Tree {
             return Ok(());
         }
 
-        if ftype.is_file() {
-            if target_name.starts_with('.') && !include_hidden {
-                return Ok(());
-            } else {
-                self.display_file(&target_name, depth)?;
-                return Ok(());
-            }
+        if target_name.starts_with('.') && !include_hidden {
+            Ok(())
+        } else {
+            self.display_file(&target_name, depth)?;
+            Ok(())
         }
-
-        Ok(())
     }
 
     fn display_dir(
