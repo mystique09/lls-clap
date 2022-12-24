@@ -149,7 +149,7 @@ impl Tree {
 }
 
 fn main() -> io::Result<()> {
-    let matches = Command::new("tree")
+    let matches = Command::new("lls")
         .version("1.0")
         .author("Benjie Ben Garcia <mystique09>")
         .about("Displays directories as trees (with optional color/HTML output)")
