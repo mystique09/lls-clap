@@ -1,13 +1,46 @@
 use std::{
     borrow::Cow,
     fs::{read_dir, DirEntry, FileType, ReadDir},
-    io::Write,
 };
 
 use clap::{Arg, ArgAction, Command};
 
 static BLUE: &str = "\u{001b}[34m";
 static RESET: &str = "\u{001b}[0m";
+
+fn main() {
+    let app = Command::new("lls")
+        .about("A tree command clone made with rust, displays the contents of a directory in a tree format.")
+        .author("Benjie Ben, mystique09")
+        .version("0.1.0")
+        .args([
+            Arg::new("all")
+                .help("Include hidden files")
+                .short('a')
+                .long("all")
+                .required(false)
+                .action(ArgAction::SetTrue),
+            Arg::new("target")
+                .help("Target directory")
+                .required(false)
+                .action(ArgAction::Set)
+                .num_args(1..),
+        ])
+        .get_matches();
+
+    let mut depth = 0;
+
+    let include_hidden: &bool = app.get_one::<bool>("all").unwrap_or(&false);
+    let default_target = String::from(".");
+    let target: &str = app.get_one::<String>("target").unwrap_or(&default_target);
+
+    println!("{}", &target);
+    let mut tree = Tree::new();
+    match tree.crawl_target(target, &mut depth, include_hidden) {
+        Ok(_) => tree.display_result(),
+        Err(why) => println!("{why}"),
+    };
+}
 
 struct Tree {
     total_files: usize,
@@ -22,14 +55,17 @@ impl Tree {
         }
     }
 
-    fn crawl_target(&mut self, path: &str, depth: &mut usize, include_hidden: &bool) {
-        let contents = read_dir(&path);
+    fn crawl_target(
+        &mut self,
+        path: &str,
+        depth: &mut usize,
+        include_hidden: &bool,
+    ) -> Result<(), std::io::Error> {
+        let contents = read_dir(path)?;
         *depth += 1;
 
-        match contents {
-            Ok(content) => self.read_target(content, depth, &path, include_hidden),
-            Err(why) => eprintln!("{why}"),
-        }
+        self.read_target(contents, depth, path, include_hidden);
+        Ok(())
     }
 
     fn read_target(&mut self, t: ReadDir, depth: &mut usize, path: &str, include_hidden: &bool) {
@@ -49,7 +85,7 @@ impl Tree {
         include_hidden: &bool,
     ) {
         match dir.file_type() {
-            Ok(ftype) => self.read_crawled_content(
+            Ok(ftype) => self.display(
                 ftype,
                 depth,
                 path,
@@ -60,7 +96,7 @@ impl Tree {
         }
     }
 
-    fn read_crawled_content(
+    fn display(
         &mut self,
         ftype: FileType,
         depth: &mut usize,
@@ -94,70 +130,46 @@ impl Tree {
         self.total_dirs += 1;
         let mut inner_depth = *depth;
 
-        println!(
-            "{}{BLUE}└── {}{RESET}",
-            &" ".repeat(inner_depth),
-            target_name
-        );
-        std::io::stdout().flush().unwrap();
-        self.crawl_target(inner_path, &mut inner_depth, include_hidden);
+        if *depth == 1 {
+            println!("{}├── {}{}", &BLUE, target_name, &RESET);
+        } else {
+            println!(
+                "{}{}├── {}{}",
+                &" ".repeat(inner_depth * 2),
+                &BLUE,
+                target_name,
+                &RESET
+            );
+        }
+
+        match self.crawl_target(inner_path, &mut inner_depth, include_hidden) {
+            Ok(_) => (),
+            Err(why) => println!("{why}"),
+        };
     }
 
     fn display_file(&mut self, target_name: &str, depth: &mut usize) {
         self.total_files += 1;
-        println!("{}└── {}", &" ".repeat(*depth), target_name);
-        std::io::stdout().flush().unwrap();
+        if *depth == 1 {
+            println!("├── {}", target_name);
+        } else {
+            println!("{}├── {}", &" ".repeat(*depth * 2), target_name);
+        }
     }
 
     fn display_result(&self) {
-        let dir_word = if self.total_dirs > 1 {
-            "directories"
+        let dir_count = if self.total_dirs > 1 {
+            format!("{} directories", &self.total_dirs)
         } else {
-            "directory"
+            format!("{} directory", &self.total_dirs)
         };
 
-        let file_word = if self.total_files > 1 {
-            "files"
+        let file_count = if self.total_files > 1 {
+            format!("{} files", &self.total_files)
         } else {
-            "file"
+            format!("{} file", &self.total_files)
         };
 
-        println!(
-            "{} {dir_word}, {} {file_word}",
-            self.total_dirs, self.total_files
-        );
-        std::io::stdout().flush().unwrap();
+        println!("{}, {}", dir_count, file_count);
     }
-}
-
-fn main() {
-    let app = Command::new("lls")
-        .about("A tree command clone made with rust, displays the contents of a directory in a tree format.")
-        .author("Benjie Ben, mystique09")
-        .version("0.1.0")
-        .args([
-            Arg::new("all")
-                .help("Include hidden files")
-                .short('a')
-                .long("all")
-                .required(false)
-                .action(ArgAction::SetTrue),
-            Arg::new("target")
-                .help("Target directory")
-                .required(false)
-                .action(ArgAction::Set)
-                .num_args(1..),
-        ])
-        .get_matches();
-
-    let mut depth = 0;
-
-    let include_hidden: &bool = app.get_one::<bool>("all").unwrap_or(&false);
-    let default_target = String::from(".");
-    let target: &str = app.get_one::<String>("target").unwrap_or(&default_target);
-
-    println!("{}", target);
-    let mut tree = Tree::new();
-    tree.crawl_target(target, &mut depth, include_hidden);
-    tree.display_result();
 }
