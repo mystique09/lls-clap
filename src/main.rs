@@ -110,9 +110,7 @@ impl Tree {
             }
             let inner_path = format!("{}/{}", path, target_name);
             self.display_dir(&target_name, &inner_path, depth, include_hidden);
-        }
-
-        if ftype.is_file() {
+        } else if ftype.is_file() {
             if target_name.starts_with('.') && !include_hidden {
                 return;
             }
